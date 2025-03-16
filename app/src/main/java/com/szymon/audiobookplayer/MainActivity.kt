@@ -32,14 +32,6 @@ class MainActivity : ComponentActivity() {
                     drawerContent = {
                         ModalDrawerSheet {
                             Spacer(Modifier.height(16.dp))
-                            FilledTonalButton(
-                                onClick = { /* Open add new audiobook screen */ },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                Text(text = stringResource(R.string.add_new_audiobook))
-                            }
                             NavigationDrawerItem(
                                 label = { Text(text = "Example element 1") },
                                 selected = false,

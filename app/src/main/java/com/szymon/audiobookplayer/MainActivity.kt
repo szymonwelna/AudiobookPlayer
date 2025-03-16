@@ -9,10 +9,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.szymon.audiobookplayer.ui.theme.AudiobookTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -20,22 +24,53 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AudiobookTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-                    Scaffold(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .nestedScroll(scrollBehavior.nestedScrollConnection),
-                        topBar = {
-                            AudiobookTopBar(scrollBehavior)
+                val drawerState = rememberDrawerState(DrawerValue.Closed)
+                val scope = rememberCoroutineScope()
+
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    drawerContent = {
+                        ModalDrawerSheet {
+                            Spacer(Modifier.height(16.dp))
+                            FilledTonalButton(
+                                onClick = { /* Open add new audiobook screen */ },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            ) {
+                                Text(text = stringResource(R.string.add_new_audiobook))
+                            }
+                            NavigationDrawerItem(
+                                label = { Text(text = "Example element 1") },
+                                selected = false,
+                                onClick = { scope.launch { drawerState.close() } }
+                            )
+                            NavigationDrawerItem(
+                                label = { Text(text = "Example element 2") },
+                                selected = false,
+                                onClick = { scope.launch { drawerState.close() } }
+                            )
                         }
-                    ) { innerPadding ->
-                        AudiobooksItemList(innerPadding)
+                    },
+                    content = {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+                            Scaffold(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                                topBar = {
+                                    AudiobookTopBar(scrollBehavior, drawerState, scope)
+                                }
+                            ) { innerPadding ->
+                                AudiobooksItemList(innerPadding)
+                            }
+                        }
                     }
-                }
+                )
             }
         }
     }
@@ -43,16 +78,24 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AudiobookTopBar(scrollBehavior: TopAppBarScrollBehavior) {
+fun AudiobookTopBar(
+    scrollBehavior: TopAppBarScrollBehavior,
+    drawerState: DrawerState,
+    scope: CoroutineScope
+) {
     CenterAlignedTopAppBar(
         title = {
             Text(
-                text = "Wiedźmin Audiobook",
+                text = "Audiobook",
                 style = MaterialTheme.typography.titleLarge
             )
         },
         navigationIcon = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                scope.launch {
+                    drawerState.open()
+                }
+            }) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
                     contentDescription = "Menu"

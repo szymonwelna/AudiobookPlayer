@@ -1,10 +1,11 @@
 package com.szymon.audiobookplayer
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Forward10
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,24 +42,24 @@ class MainActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
 
                 val audiobooks = listOf(
-                    Audiobook("Granica Możliwości", R.drawable.granica_mozliwosci_okladka),
-                    Audiobook("Okruch Lodu", R.drawable.okruch_lodu_okladka),
-                    Audiobook("Wieczny Ogień", R.drawable.wieczny_ogien_okladka),
-                    Audiobook("Trochę Poświęcenia", R.drawable.troche_poswiecenia_okladka),
-                    Audiobook("Miecz Przeznaczenia", R.drawable.miecz_przeznaczenia_okladka),
-                    Audiobook("Coś Więcej", R.drawable.cos_wiecej_okladka),
-                    Audiobook("Wiedźmin", R.drawable.wiedzmin_okladka),
-                    Audiobook("Ziarno Prawdy", R.drawable.ziarno_prawdy_okladka),
-                    Audiobook("Mniejsze Zło", R.drawable.mniejsze_zlo_okladka),
-                    Audiobook("Kwestia Ceny", R.drawable.kraniec_swiata_okladka),
-                    Audiobook("Kraniec Świata", R.drawable.kraniec_swiata_okladka),
-                    Audiobook("Ostatnie Życzenie", R.drawable.ostatnie_zyczenie_okladka),
-                    Audiobook("Krew Elfów", R.drawable.krew_elfow_okladka),
-                    Audiobook("Czas Pogardy", R.drawable.czas_pogardy_okladka),
-                    Audiobook("Chrzest Ognia", R.drawable.chrzest_ognia_okladka),
-                    Audiobook("Wieża Jaskółki", R.drawable.wieza_jaskolki_okladka),
-                    Audiobook("Pani Jeziora", R.drawable.pani_jeziora_okladka),
-                    Audiobook("Sezon Burz", R.drawable.sezon_burz_okladka)
+                    Audiobook("Granica Możliwości", R.drawable.granica_mozliwosci_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Okruch Lodu", R.drawable.okruch_lodu_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Wieczny Ogień", R.drawable.wieczny_ogien_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Trochę Poświęcenia", R.drawable.troche_poswiecenia_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Miecz Przeznaczenia", R.drawable.miecz_przeznaczenia_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Coś Więcej", R.drawable.cos_wiecej_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Wiedźmin", R.drawable.wiedzmin_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Ziarno Prawdy", R.drawable.ziarno_prawdy_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Mniejsze Zło", R.drawable.mniejsze_zlo_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Kwestia Ceny", R.drawable.kraniec_swiata_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Kraniec Świata", R.drawable.kraniec_swiata_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Ostatnie Życzenie", R.drawable.ostatnie_zyczenie_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Krew Elfów", R.drawable.krew_elfow_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Czas Pogardy", R.drawable.czas_pogardy_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Chrzest Ognia", R.drawable.chrzest_ognia_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Wieża Jaskółki", R.drawable.wieza_jaskolki_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Pani Jeziora", R.drawable.pani_jeziora_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Sezon Burz", R.drawable.sezon_burz_okladka, "1_Granica_Mozliwosci.mp3")
                 )
                 var selectedAudiobook by remember { mutableStateOf(audiobooks[0]) }
 
@@ -67,7 +69,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class Audiobook(val title: String, val imageRes: Int)
+data class Audiobook(
+    val title: String,
+    val imageRes: Int,
+    val audioFileName: String
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,7 +142,8 @@ fun AudiobookNavigationDrawer(
                     ) {
                         AudiobookImage(selectedAudiobook.imageRes, selectedAudiobook.title)
                         BookTitle(selectedAudiobook.title)
-                        NavigationButtons()
+                        val context = LocalContext.current
+                        NavigationButtons(selectedAudiobook, context)
                     }
                 }
             }
@@ -174,10 +181,10 @@ fun AudiobookImage(selectedImage: Int, selectedImageDescription: String? = null,
         painter = painterResource(id = selectedImage),
         contentDescription = selectedImageDescription,
         modifier = modifier
-            .fillMaxWidth(0.7f) // Obrazek zajmuje 70% szerokości ekranu
-            .aspectRatio(1f) // Zachowanie proporcji (1:1)
-            .clip(RoundedCornerShape(16.dp)) // Zaokrąglone rogi
-            .shadow(8.dp, RoundedCornerShape(16.dp)) // Cień pasujący do kształtu
+            .fillMaxWidth(0.7f)
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(16.dp))
+            .shadow(8.dp, RoundedCornerShape(16.dp))
     )
 }
 
@@ -197,7 +204,9 @@ fun BookTitle(selectedAudiobookTitle: String = "Nie wybrano", modifier: Modifier
 
 
 @Composable
-fun NavigationButtons(modifier: Modifier = Modifier) {
+fun NavigationButtons(selectedAudiobook: Audiobook, context: Context, modifier: Modifier = Modifier) {
+    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -206,7 +215,7 @@ fun NavigationButtons(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = { /* TODO: Skip backward */ },
+            onClick = { mediaPlayer?.seekTo((mediaPlayer?.currentPosition ?: 0) - 10000) },
             modifier = Modifier.size(64.dp)
         ) {
             Icon(
@@ -216,7 +225,10 @@ fun NavigationButtons(modifier: Modifier = Modifier) {
             )
         }
         IconButton(
-            onClick = { /* TODO: Play/Pause */ },
+            onClick = {
+                mediaPlayer?.release()
+                mediaPlayer = playAudiobook(context, selectedAudiobook.audioFileName)
+                      },
             modifier = Modifier.size(80.dp)
         ) {
             Icon(
@@ -226,7 +238,7 @@ fun NavigationButtons(modifier: Modifier = Modifier) {
             )
         }
         IconButton(
-            onClick = { /* TODO: Skip forward */ },
+            onClick = { mediaPlayer?.seekTo((mediaPlayer?.currentPosition ?: 0) + 10000) },
             modifier = Modifier.size(64.dp)
         ) {
             Icon(
@@ -236,4 +248,23 @@ fun NavigationButtons(modifier: Modifier = Modifier) {
             )
         }
     }
+}
+
+
+fun playAudiobook(context: Context, fileName: String): MediaPlayer {
+    val mediaPlayer = MediaPlayer()
+    try {
+        val assetFileDescriptor = context.assets.openFd(fileName)
+        mediaPlayer.setDataSource(
+            assetFileDescriptor.fileDescriptor,
+            assetFileDescriptor.startOffset,
+            assetFileDescriptor.length
+        )
+        assetFileDescriptor.close()
+        mediaPlayer.prepare()
+        mediaPlayer.start()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return mediaPlayer
 }

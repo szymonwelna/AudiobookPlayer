@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -112,15 +114,7 @@ fun AudiobookNavigationDrawer(
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(16.dp)
                 )
-                audiobooks.forEach { audiobook ->
-                    ListItem(
-                        headlineContent = { Text(audiobook.title) },
-                        modifier = Modifier.padding(8.dp).clickable {
-                            onAudiobookSelected(audiobook)
-                            scope.launch { drawerState.close() }
-                        }
-                    )
-                }
+                AudiobooksScrollableList(audiobooks, selectedAudiobook, onAudiobookSelected, drawerState, scope)
             }
         },
         content = {
@@ -149,6 +143,30 @@ fun AudiobookNavigationDrawer(
         }
     )
 }
+
+@Composable
+fun AudiobooksScrollableList(
+    audiobooks: List<Audiobook>,
+    selectedAudiobook: Audiobook,
+    onAudiobookSelected: (Audiobook) -> Unit,
+    drawerState: DrawerState,
+    scope: CoroutineScope
+) {
+    LazyColumn {
+        items(audiobooks) { audiobook ->
+            NavigationDrawerItem(
+                label = { Text(audiobook.title) },
+                selected = audiobook == selectedAudiobook,
+                onClick = {
+                    onAudiobookSelected(audiobook)
+                    scope.launch { drawerState.close() }
+                },
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+    }
+}
+
 
 @Composable
 fun AudiobookImage(selectedImage: Int, selectedImageDescription: String? = null, modifier: Modifier = Modifier) {

@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     Audiobook("Trochę Poświęcenia", R.drawable.troche_poswiecenia_okladka, "1_Granica_Mozliwosci.mp3"),
                     Audiobook("Miecz Przeznaczenia", R.drawable.miecz_przeznaczenia_okladka, "1_Granica_Mozliwosci.mp3"),
                     Audiobook("Coś Więcej", R.drawable.cos_wiecej_okladka, "1_Granica_Mozliwosci.mp3"),
-                    Audiobook("Wiedźmin", R.drawable.wiedzmin_okladka, "1_Granica_Mozliwosci.mp3"),
+                    Audiobook("Wiedźmin", R.drawable.wiedzmin_okladka, "7_Wiedzmin.mp3"),
                     Audiobook("Ziarno Prawdy", R.drawable.ziarno_prawdy_okladka, "1_Granica_Mozliwosci.mp3"),
                     Audiobook("Mniejsze Zło", R.drawable.mniejsze_zlo_okladka, "1_Granica_Mozliwosci.mp3"),
                     Audiobook("Kwestia Ceny", R.drawable.kraniec_swiata_okladka, "1_Granica_Mozliwosci.mp3"),
@@ -69,11 +69,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class Audiobook(
-    val title: String,
-    val imageRes: Int,
-    val audioFileName: String
-)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,14 +131,27 @@ fun AudiobookNavigationDrawer(
                         .padding(innerPadding),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val context = LocalContext.current
+
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        var currentTime by remember { mutableStateOf(0L) }
+                        var audiobookDuration by remember { mutableStateOf(0L) }
+
+                        LaunchedEffect(selectedAudiobook) {
+                            audiobookDuration = getAudioDuration(context, selectedAudiobook.audioFileName)
+                        }
+
                         AudiobookImage(selectedAudiobook.imageRes, selectedAudiobook.title)
                         BookTitle(selectedAudiobook.title)
-                        val context = LocalContext.current
+                        AudiobookProgressBar(
+                            currentTime = currentTime,
+                            totalTime = audiobookDuration,
+                            onSeek = { newTime -> currentTime = newTime }
+                        )
                         NavigationButtons(selectedAudiobook, context)
                     }
                 }
@@ -151,7 +160,7 @@ fun AudiobookNavigationDrawer(
     )
 }
 
-@Composable
+        @Composable
 fun AudiobooksScrollableList(
     audiobooks: List<Audiobook>,
     selectedAudiobook: Audiobook,
@@ -174,7 +183,6 @@ fun AudiobooksScrollableList(
     }
 }
 
-
 @Composable
 fun AudiobookImage(selectedImage: Int, selectedImageDescription: String? = null, modifier: Modifier = Modifier) {
     Image(
@@ -187,7 +195,6 @@ fun AudiobookImage(selectedImage: Int, selectedImageDescription: String? = null,
             .shadow(8.dp, RoundedCornerShape(16.dp))
     )
 }
-
 
 @Composable
 fun BookTitle(selectedAudiobookTitle: String = "Nie wybrano", modifier: Modifier = Modifier) {
@@ -202,6 +209,36 @@ fun BookTitle(selectedAudiobookTitle: String = "Nie wybrano", modifier: Modifier
     )
 }
 
+@Composable
+fun AudiobookProgressBar(
+    currentTime: Long,
+    totalTime: Long,
+    onSeek: (Long) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Pasek postępu
+        Slider(
+            value = currentTime.toFloat(),
+            onValueChange = { onSeek(it.toLong()) },
+            valueRange = 0f..totalTime.toFloat(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Wiersz z czasami
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = formatTime(currentTime), style = MaterialTheme.typography.bodySmall)
+            Text(text = formatTime(totalTime), style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
 
 @Composable
 fun NavigationButtons(selectedAudiobook: Audiobook, context: Context, modifier: Modifier = Modifier) {
@@ -250,6 +287,7 @@ fun NavigationButtons(selectedAudiobook: Audiobook, context: Context, modifier: 
     }
 }
 
+// Utility functions
 
 fun playAudiobook(context: Context, fileName: String): MediaPlayer {
     val mediaPlayer = MediaPlayer()
@@ -268,3 +306,39 @@ fun playAudiobook(context: Context, fileName: String): MediaPlayer {
     }
     return mediaPlayer
 }
+
+fun getAudioDuration(context: Context, fileName: String): Long {
+    val assetFileDescriptor = context.assets.openFd(fileName)
+    val mediaPlayer = MediaPlayer().apply {
+        setDataSource(
+            assetFileDescriptor.fileDescriptor,
+            assetFileDescriptor.startOffset,
+            assetFileDescriptor.length
+        )
+        prepare()
+    }
+    val duration = mediaPlayer.duration.toLong()
+    mediaPlayer.release()
+    return duration
+}
+
+fun formatTime(timeMillis: Long): String {
+    val totalSeconds = timeMillis / 1000
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+
+    return if (hours > 0) {
+        String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    } else {
+        String.format("%02d:%02d", minutes, seconds)
+    }
+}
+
+// Data
+
+data class Audiobook(
+    val title: String,
+    val imageRes: Int,
+    val audioFileName: String
+)

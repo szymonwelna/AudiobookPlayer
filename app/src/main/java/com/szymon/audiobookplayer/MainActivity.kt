@@ -1,8 +1,5 @@
 package com.szymon.audiobookplayer
 
-import com.szymon.audiobookplayer.Audiobook
-import com.szymon.audiobookplayer.audiobooks
-
 import android.content.Context
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -33,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import java.util.Locale
 
 
 class MainActivity : ComponentActivity() {
@@ -128,8 +126,8 @@ fun AudiobookNavigationDrawer(
                             audiobookDuration = getAudioDuration(context, selectedAudiobook.audioFileName)
                         }
 
-                        AudiobookImage(selectedAudiobook.imageRes, selectedAudiobook.title)
-                        BookTitle(selectedAudiobook.title)
+                        AudiobookImage(Modifier, selectedAudiobook.imageRes, selectedAudiobook.title)
+                        BookTitle(Modifier, selectedAudiobook.title)
                         AudiobookProgressBar(
                             currentTime = currentTime,
                             totalTime = audiobookDuration,
@@ -143,7 +141,7 @@ fun AudiobookNavigationDrawer(
     )
 }
 
-        @Composable
+@Composable
 fun AudiobooksScrollableList(
     audiobooks: List<Audiobook>,
     selectedAudiobook: Audiobook,
@@ -167,7 +165,7 @@ fun AudiobooksScrollableList(
 }
 
 @Composable
-fun AudiobookImage(selectedImage: Int, selectedImageDescription: String? = null, modifier: Modifier = Modifier) {
+fun AudiobookImage(modifier: Modifier = Modifier, selectedImage: Int, selectedImageDescription: String? = null) {
     Image(
         painter = painterResource(id = selectedImage),
         contentDescription = selectedImageDescription,
@@ -180,7 +178,7 @@ fun AudiobookImage(selectedImage: Int, selectedImageDescription: String? = null,
 }
 
 @Composable
-fun BookTitle(selectedAudiobookTitle: String = "Nie wybrano", modifier: Modifier = Modifier) {
+fun BookTitle(modifier: Modifier = Modifier, selectedAudiobookTitle: String = "Nie wybrano") {
     Text(
         text = selectedAudiobookTitle,
         style = MaterialTheme.typography.titleLarge,
@@ -204,7 +202,6 @@ fun AudiobookProgressBar(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        // Pasek postępu
         Slider(
             value = currentTime.toFloat(),
             onValueChange = { onSeek(it.toLong()) },
@@ -212,7 +209,6 @@ fun AudiobookProgressBar(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Wiersz z czasami
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -312,8 +308,8 @@ fun formatTime(timeMillis: Long): String {
     val seconds = totalSeconds % 60
 
     return if (hours > 0) {
-        String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        String.format(locale = Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds)
     } else {
-        String.format("%02d:%02d", minutes, seconds)
+        String.format(locale = Locale.getDefault(), "%02d:%02d", minutes, seconds)
     }
 }

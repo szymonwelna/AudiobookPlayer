@@ -244,7 +244,7 @@ fun NavigationButtons(selectedAudiobook: Audiobook, context: Context, modifier: 
             onClick = {
                 mediaPlayer?.release()
                 mediaPlayer = playAudiobook(context, selectedAudiobook.audioFileName)
-                      },
+            },
             modifier = Modifier.size(80.dp)
         ) {
             Icon(

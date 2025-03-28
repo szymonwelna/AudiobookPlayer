@@ -1,16 +1,15 @@
 package com.szymon.audiobookplayer
 
 import android.content.Context
+import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
-
 
 object ExoPlayerSingleton {
     private var player: ExoPlayer? = null
     private var currentMediaItem: MediaItem? = null
 
-
-    fun getPlayer(context: Context): ExoPlayer {
+    private fun getPlayer(context: Context): ExoPlayer {
         if (player == null) {
             player = ExoPlayer.Builder(context).build()
         }
@@ -24,20 +23,21 @@ object ExoPlayerSingleton {
     }
 
     fun playAudio(context: Context, mp3FileName: String) {
-        val player = getPlayer(context)
+        try {
+            val player = getPlayer(context)
 
-        val assetUri = "asset:///${mp3FileName}"
-        val mediaItem = MediaItem.fromUri(assetUri)
+            val assetUri = "asset:///$mp3FileName"
+            val mediaItem = MediaItem.fromUri(assetUri)
 
-        if (currentMediaItem?.mediaId != mediaItem.mediaId) {
-            player.stop()
-            player.clearMediaItems()
-            player.setMediaItem(mediaItem)
-            player.prepare()
-            player.play()
-            currentMediaItem = mediaItem
-        } else {
-            player.play()
+            if (currentMediaItem?.mediaId != mediaItem.mediaId || !player.isPlaying) {
+                player.stop()
+                player.clearMediaItems()
+                player.setMediaItem(mediaItem)
+                player.prepare()
+                currentMediaItem = mediaItem
+            }
+        } catch (e: Exception) {
+            Log.e("ExoPlayerSingleton", "Error playing audio: ${e.message}")
         }
     }
 
@@ -54,15 +54,15 @@ object ExoPlayerSingleton {
     }
 
     fun skipTime(millis: Long) {
-        player?.seekTo(player?.currentPosition!! + millis)
+        player?.seekTo((player?.currentPosition ?: 0L) + millis)
+    }
+
+    fun getCurrentTime(): Long {
+        return player?.currentPosition ?: 0L
     }
 
     fun getDuration(): Long {
-        return player?.duration ?: 0L
-    }
-
-    fun setVolume(volume: Float) {
-        player?.volume = volume
+        return player?.contentDuration ?: 0L
     }
 
     fun isPlaying(): Boolean {

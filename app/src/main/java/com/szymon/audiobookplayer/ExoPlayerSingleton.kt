@@ -2,8 +2,10 @@ package com.szymon.audiobookplayer
 
 import android.content.Context
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import java.io.File
 
 object ExoPlayerSingleton {
     private var player: ExoPlayer? = null
@@ -25,9 +27,8 @@ object ExoPlayerSingleton {
     fun playAudio(context: Context, mp3FileName: String) {
         try {
             val player = getPlayer(context)
-
-            val assetUri = "asset:///$mp3FileName"
-            val mediaItem = MediaItem.fromUri(assetUri)
+            val mp3File = File(context.filesDir, mp3FileName)
+            val mediaItem = MediaItem.fromUri(mp3File.toUri())
 
             if (currentMediaItem?.mediaId != mediaItem.mediaId || !player.isPlaying) {
                 player.stop()

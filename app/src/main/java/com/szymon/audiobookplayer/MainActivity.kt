@@ -1,5 +1,6 @@
 package com.szymon.audiobookplayer
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +22,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        val sharedPref = getSharedPreferences("last_played_audio", Context.MODE_PRIVATE)
+        sharedPref.edit().putLong("last_played_position", ExoPlayerSingleton.getCurrentTime()).apply()
         ExoPlayerSingleton.releasePlayer()
     }
 }

@@ -1,5 +1,6 @@
 package com.szymon.audiobookplayer.composables
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +27,7 @@ import com.szymon.audiobookplayer.formatTime
 import kotlinx.coroutines.delay
 
 @Composable
-fun AudiobookProgressBar() {
+fun AudiobookProgressBar(context: Context) {
     var currentTime by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(0L) }
     var isDragging by remember { mutableStateOf(false) }
@@ -62,7 +63,7 @@ fun AudiobookProgressBar() {
                 isDragging = true
             },
             onValueChangeFinished = {
-                ExoPlayerSingleton.seekTo(currentTime)
+                ExoPlayerSingleton.seekTo(context, currentTime)
                 isDragging = false
             },
             valueRange = if (duration > 0) 0f..duration.toFloat() else 0f..1f,

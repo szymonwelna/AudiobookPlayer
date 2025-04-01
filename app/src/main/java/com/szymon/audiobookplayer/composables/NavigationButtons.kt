@@ -1,5 +1,6 @@
 package com.szymon.audiobookplayer.composables
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,11 +20,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.szymon.audiobookplayer.ExoPlayerSingleton
 
 @Composable
-fun NavigationButtons() {
+fun NavigationButtons(context: Context) {
     var isPlaying by remember { mutableStateOf(ExoPlayerSingleton.isPlaying()) }
 
     Row(
@@ -34,7 +36,7 @@ fun NavigationButtons() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = { ExoPlayerSingleton.skipTime(-10000) },
+            onClick = { ExoPlayerSingleton.skipTime(context,-10000) },
             modifier = Modifier.size(64.dp)
         ) {
             Icon(
@@ -64,7 +66,7 @@ fun NavigationButtons() {
             )
         }
         IconButton(
-            onClick = { ExoPlayerSingleton.skipTime(10000) },
+            onClick = { ExoPlayerSingleton.skipTime(context, 10000) },
             modifier = Modifier.size(64.dp)
         ) {
             Icon(

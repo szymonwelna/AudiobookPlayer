@@ -48,8 +48,8 @@ fun AudiobookPlayerScreen(selectedAudiobook: Audiobook, modifier: Modifier = Mod
             AudiobookImage(Modifier, selectedAudiobook.imageRes, selectedAudiobook.title)
             BookTitle(Modifier, selectedAudiobook.title)
             Spacer(modifier = Modifier.height(64.dp))
-            AudiobookProgressBar()
-            NavigationButtons()
+            AudiobookProgressBar(LocalContext.current)
+            NavigationButtons(LocalContext.current)
         }
     }
 }

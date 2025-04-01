@@ -24,11 +24,14 @@ object ExoPlayerSingleton {
         currentMediaItem = null
     }
 
-    fun playAudio(context: Context, mp3FileName: String) {
+    fun playAudio(context: Context, mp3FileName: String, audiobookIndex: Int) {
         try {
             val player = getPlayer(context)
             val mp3File = File(context.filesDir, mp3FileName)
             val mediaItem = MediaItem.fromUri(mp3File.toUri())
+
+            val sharedPref = context.getSharedPreferences("last_playback", Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
 
             if (currentMediaItem?.mediaId != mediaItem.mediaId || !player.isPlaying) {
                 player.stop()
@@ -36,6 +39,9 @@ object ExoPlayerSingleton {
                 player.setMediaItem(mediaItem)
                 player.prepare()
                 currentMediaItem = mediaItem
+                editor.putInt("last_played_audio", audiobookIndex)
+                editor.putLong("last_played_position", 0)
+                editor.apply()
             }
         } catch (e: Exception) {
             Log.e("ExoPlayerSingleton", "Error playing audio: ${e.message}")
@@ -50,12 +56,17 @@ object ExoPlayerSingleton {
         player?.play()
     }
 
-    fun seekTo(position: Long) {
+    fun seekTo(context: Context, position: Long) {
         player?.seekTo(position)
+        val sharedPref = context.getSharedPreferences("last_playback", Context.MODE_PRIVATE)
+        sharedPref.edit().putLong("last_played_position", position).apply()
     }
 
-    fun skipTime(millis: Long) {
-        player?.seekTo((player?.currentPosition ?: 0L) + millis)
+    fun skipTime(context: Context, millis: Long) {
+        val position = (player?.currentPosition ?: 0L) + millis
+        player?.seekTo(position)
+        val sharedPref = context.getSharedPreferences("last_playback", Context.MODE_PRIVATE)
+        sharedPref.edit().putLong("last_played_position", position).apply()
     }
 
     fun getCurrentTime(): Long {

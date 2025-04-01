@@ -1,5 +1,6 @@
 package com.szymon.audiobookplayer.composables
 
+import android.content.Context
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -23,8 +24,13 @@ fun AudiobookMainScreen(
     drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),
     scope: CoroutineScope = rememberCoroutineScope()
 ) {
-    var selectedAudiobook by remember { mutableStateOf(audiobooks[0]) }
-    ExoPlayerSingleton.playAudio(LocalContext.current, selectedAudiobook.audioFileName)
+    val sharedPref = LocalContext.current.getSharedPreferences("last_playback", Context.MODE_PRIVATE)
+    val lastPlayedAudio = sharedPref.getInt("last_played_audio", 0)
+    val lastPlayedPosition = sharedPref.getLong("last_played_position", 0L)
+
+    var selectedAudiobook by remember { mutableStateOf(audiobooks[lastPlayedAudio]) }
+    ExoPlayerSingleton.playAudio(LocalContext.current, selectedAudiobook.audioFileName, audiobooks.indexOf(selectedAudiobook))
+    ExoPlayerSingleton.seekTo(LocalContext.current, lastPlayedPosition)
 
     ModalNavigationDrawer(
         drawerState = drawerState,

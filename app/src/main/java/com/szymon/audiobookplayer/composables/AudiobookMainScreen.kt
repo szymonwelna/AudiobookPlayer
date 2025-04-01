@@ -27,16 +27,18 @@ fun AudiobookMainScreen(
     val sharedPref = LocalContext.current.getSharedPreferences("last_playback", Context.MODE_PRIVATE)
     val lastPlayedAudio = sharedPref.getInt("last_played_audio", 0)
     val lastPlayedPosition = sharedPref.getLong("last_played_position", 0L)
+    val context = LocalContext.current
 
     var selectedAudiobook by remember { mutableStateOf(audiobooks[lastPlayedAudio]) }
-    ExoPlayerSingleton.playAudio(LocalContext.current, selectedAudiobook.audioFileName, audiobooks.indexOf(selectedAudiobook))
-    ExoPlayerSingleton.seekTo(LocalContext.current, lastPlayedPosition)
+    ExoPlayerSingleton.playAudio(context, selectedAudiobook.audioFileName, audiobooks.indexOf(selectedAudiobook))
+    ExoPlayerSingleton.seekTo(context, lastPlayedPosition)
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             NavigationDrawer(audiobooks, selectedAudiobook, { newAudiobook ->
                 selectedAudiobook = newAudiobook
+                ExoPlayerSingleton.seekTo(context, 0)
             }, drawerState, scope)
         }
     ) {

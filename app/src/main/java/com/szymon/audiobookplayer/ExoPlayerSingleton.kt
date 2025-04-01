@@ -31,7 +31,6 @@ object ExoPlayerSingleton {
             val mediaItem = MediaItem.fromUri(mp3File.toUri())
 
             val sharedPref = context.getSharedPreferences("last_playback", Context.MODE_PRIVATE)
-            val editor = sharedPref.edit()
 
             if (currentMediaItem?.mediaId != mediaItem.mediaId || !player.isPlaying) {
                 player.stop()
@@ -39,9 +38,7 @@ object ExoPlayerSingleton {
                 player.setMediaItem(mediaItem)
                 player.prepare()
                 currentMediaItem = mediaItem
-                editor.putInt("last_played_audio", audiobookIndex)
-                editor.putLong("last_played_position", 0)
-                editor.apply()
+                sharedPref.edit().putInt("last_played_audio", audiobookIndex).apply()
             }
         } catch (e: Exception) {
             Log.e("ExoPlayerSingleton", "Error playing audio: ${e.message}")

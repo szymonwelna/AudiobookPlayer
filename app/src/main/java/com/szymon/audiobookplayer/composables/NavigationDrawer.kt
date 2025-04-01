@@ -9,6 +9,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.szymon.audiobookplayer.Audiobook
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +23,6 @@ fun NavigationDrawer(audiobooks: List<Audiobook>, selectedAudiobook: Audiobook, 
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(16.dp)
         )
-        AudiobooksScrollableList(audiobooks, selectedAudiobook, onAudiobookSelected, drawerState, scope)
+        AudiobooksScrollableList(audiobooks, selectedAudiobook, onAudiobookSelected, drawerState, scope, LocalContext.current)
     }
 }

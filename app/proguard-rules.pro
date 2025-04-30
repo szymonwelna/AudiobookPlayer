@@ -12,6 +12,9 @@
 #   public *;
 #}
 
+# Keep all classes in a specific package
+-keep class com.example.mypackage.** { *; }
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable

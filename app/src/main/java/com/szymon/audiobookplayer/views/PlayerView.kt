@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
  */
 
 @Composable
-fun Player() {
+fun Player(modifier: Modifier = Modifier) {
     /*TODO: Implement player view, adjust layout of components and add functionality */
     Column(
          horizontalAlignment = Alignment.CenterHorizontally
